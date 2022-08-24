@@ -147,10 +147,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\BST\BST_Node.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MemberAccount.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BST\BST_Node.h" />
     <ClInclude Include="src\MemberAccount.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

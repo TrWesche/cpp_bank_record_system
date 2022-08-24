@@ -13,7 +13,7 @@ MemberAccount::MemberAccount(long accID, std::string First, std::string Last, st
 std::string MemberAccount::CreateEntry()
 {
 	std::string rval;
-	std::string delim = "\t";
+	std::string delim = "\n";
 	rval.append(std::to_string(AccountID))
 		.append(delim)
 		.append(FirstName)

@@ -3,11 +3,11 @@
 #include <fstream>
 #include <string>
 #include "MemberAccount.h"
-
+#include "BST/BST_Node.h"
 
 
 bool openAccount(std::fstream& fs, std::string& filename) {
-	fs.open(filename, std::ios_base::binary | std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
+	fs.open(filename, /* std::ios_base::binary | */ std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
 	if (!fs.is_open()) {
 		std::cout << "Open Account Operation Failed - Unable to Open DB File";
 		return false;
@@ -26,6 +26,12 @@ bool openAccount(std::fstream& fs, std::string& filename) {
 
 
 	//fs.seekp(0);
+
+	//int lineno = 0;
+	//while (!fs.eof()) {
+	//	fs >> lineno;
+	//	std::cout << lineno;
+	//}
 	auto size = fs.tellg();
 	std::string str(size, '\0');
 	fs.seekg(0);
@@ -38,10 +44,62 @@ bool openAccount(std::fstream& fs, std::string& filename) {
 }
 
 
+
+
+bool accWithdraw(std::fstream& fs, std::string& filename) {
+	//SimpleNode test(5);
+	//std::cout << "data" << test.data_internal << "left" << test.left_branch << "right" << test.right_branch << std::endl;
+	long AccountIDx = 1;
+	std::string FirstNamex = "FirstName1";
+	std::string LastNamex = "LastName1";
+	std::string PhoneNumberx = "111-456-7890";
+	long long AccountBalancex = 111545;
+
+	MemberAccountNode acctestx(AccountIDx, FirstNamex, LastNamex, PhoneNumberx, AccountBalancex);
+
+
+
+
+	long AccountID = 2;
+	std::string FirstName = "FirstName2";
+	std::string LastName = "LastName2";
+	std::string PhoneNumber = "222-456-7890";
+	long long AccountBalance = 234545;
+
+	MemberAccountNode acctest(AccountID, FirstName, LastName, PhoneNumber, AccountBalance);
+
+	acctest.left_branch = &acctestx;
+
+	std::cout << "Member Account Node" <<
+		acctest.account_id << " " <<
+		acctest.first_name << " " <<
+		acctest.last_name << " " <<
+		acctest.phone_number << " " <<
+		acctest.account_balance << " " <<
+		acctest.left_branch << " " <<
+		acctest.right_branch << " " << std::endl;
+
+
+	
+	
+	// Read in previous account balance
+	//fs.open(filename, std::ios_base::binary | std::ios_base::in);
+
+	//fs.close();
+
+	// Write new account balance
+	//fs.open(filename, std::ios_base::binary | std::ios_base::out);
+
+	//fs.close();
+	return true;
+}
+
+
 int main(int argv, char* argc[]) {
 	std::string accFilename = "account_db.bin";
 	std::fstream fs;
 	bool runApp = true;
+	
 
 	while (runApp) {
 		std::cout << "Welcome to Simplex Banking Solutions\n\n";
@@ -69,6 +127,8 @@ int main(int argv, char* argc[]) {
 			break;
 		case 2:
 			std::cout << "Check Account Balance\n" << std::endl;
+			accWithdraw(fs, accFilename);
+			
 			break;
 		case 3:
 			std::cout << "Withdraw Funds\n" << std::endl;
@@ -96,17 +156,3 @@ int main(int argv, char* argc[]) {
 	}
 }
 
-
-
-bool accWithdraw(std::fstream& fs, std::string& filename) {
-	// Read in previous account balance
-	fs.open(filename, std::ios_base::binary | std::ios_base::in);
-
-	fs.close();
-
-	// Write new account balance
-	fs.open(filename, std::ios_base::binary | std::ios_base::out);
-
-	fs.close();
-	return true;
-}
