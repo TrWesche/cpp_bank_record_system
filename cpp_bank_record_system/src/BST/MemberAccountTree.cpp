@@ -1,3 +1,4 @@
+#include <iostream>
 #include "MemberAccountTree.h"
 
 MemberAccountTree::MemberAccountTree()
@@ -12,24 +13,75 @@ bool MemberAccountTree::initializeTree()
 
 bool MemberAccountTree::addNode(BSTNode* add_node)
 {
-	// If the tree is empty set the root node to be equal to the current node.
-	if (this->getTreeRoot() == nullptr) {
-		this->setTreeRoot(add_node);
-		return true;
+	MemberAccountNode* operationNode = static_cast<MemberAccountNode*>(add_node);
+	if (!operationNode) {
+		return false;
 	}
 
-	// If account_id < root_node.account_id then
-	//	if left_branch == nullptr
-	//		left_branch == add_node_pointer
-	//  else
-	//      recursively call add_node
-	// --------- This seems to indicate it might be better to implement the add/remove node on the node itself, something to think about
-	//       node.add_node(new_node) { if (this.account_id > new_node.account_id) {if (this.left_branch) {this.left_branch.add_node(new_node).....
+	// If the tree is empty set the root node to be equal to the current node.
+	if (this->getTreeRoot() == nullptr) {
+		this->setTreeRoot(operationNode);
+		return true;
+	}
+	
 
-	return false;
+	bool rSuccess = false;
+	bool insertComplete = false;
+	MemberAccountNode* comparisonNode = static_cast<MemberAccountNode*>(getTreeRoot());
+
+	while (!insertComplete) {
+		if (operationNode->account_id > comparisonNode->account_id) 
+		{
+			if (comparisonNode->right_branch == nullptr) {
+				comparisonNode->right_branch = operationNode;
+				insertComplete = true;
+				rSuccess = true;
+			}
+			else {
+				comparisonNode = static_cast<MemberAccountNode*>(comparisonNode->right_branch);
+			}
+		}
+		else if (operationNode->account_id < comparisonNode->account_id) 
+		{
+			if (comparisonNode->left_branch == nullptr) 
+			{
+				comparisonNode->left_branch = operationNode;
+				insertComplete = true;
+				rSuccess = true;
+			}
+			else 
+			{
+				comparisonNode = static_cast<MemberAccountNode*>(comparisonNode->left_branch);
+			}
+		}
+		else 
+		{
+			std::cout << "Non-Unique Identifier in Tree!" << std::endl;
+			insertComplete = true;
+			rSuccess = false;
+		}
+	}
+
+	return rSuccess;
 }
 
 bool MemberAccountTree::removeNode(BSTNode* remove_node)
 {
-	return false;
+	MemberAccountNode* operationNode = static_cast<MemberAccountNode*>(remove_node);
+	if (!operationNode) {
+		return false;
+	}
+
+	// If the root node is missing something is wrong, tree should be empty
+	if (this->getTreeRoot() == nullptr) {
+		return false;
+	}
+
+	bool rSuccess = false;
+	bool removeComplete = false;
+	MemberAccountNode* comparisonNode = static_cast<MemberAccountNode*>(getTreeRoot());
+
+
+
+	return rSuccess;
 }
