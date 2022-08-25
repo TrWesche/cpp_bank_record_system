@@ -4,7 +4,7 @@
 #include <string>
 #include "MemberAccount.h"
 #include "BST/BST_Node.h"
-
+#include "BST/MemberAccountTree.h"
 
 bool openAccount(std::fstream& fs, std::string& filename) {
 	fs.open(filename, /* std::ios_base::binary | */ std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
@@ -42,8 +42,6 @@ bool openAccount(std::fstream& fs, std::string& filename) {
 	fs.close();
 	return true;
 }
-
-
 
 
 bool accWithdraw(std::fstream& fs, std::string& filename) {
@@ -95,6 +93,70 @@ bool accWithdraw(std::fstream& fs, std::string& filename) {
 }
 
 
+bool BSTTesting(std::fstream& fs, std::string& filename)
+{
+	MemberAccountTree testTree;
+
+	long accid_a = 10;
+	std::string fn_a = "FirstName1";
+	std::string ln_a = "LastName1";
+	std::string pn_a = "111-456-7890";
+	long long ab_a = 111545;
+
+	MemberAccountNode node_a = MemberAccountNode(accid_a, fn_a, ln_a, pn_a, ab_a);
+
+
+
+	long accid_b = 2;
+	std::string fn_b = "FirstName2";
+	std::string ln_b = "LastName2";
+	std::string pn_b = "222-456-7890";
+	long long ab_b = 222;
+
+	MemberAccountNode node_b = MemberAccountNode(accid_b, fn_b, ln_b, pn_b, ab_b);
+
+
+	long accid_c = 30;
+	std::string fn_c = "FirstName3";
+	std::string ln_c = "LastName3";
+	std::string pn_c = "333-456-7890";
+	long long ab_c = 333333;
+
+	MemberAccountNode node_c = MemberAccountNode(accid_c, fn_c, ln_c, pn_c, ab_c);
+
+
+	long accid_d = 50;
+	std::string fn_d = "FirstName4";
+	std::string ln_d = "LastName4";
+	std::string pn_d = "444-456-7890";
+	long long ab_d = 444444;
+
+	MemberAccountNode node_d = MemberAccountNode(accid_d, fn_d, ln_d, pn_d, ab_d);
+
+
+	long accid_e = 21;
+	std::string fn_e = "FirstName5";
+	std::string ln_e = "LastName5";
+	std::string pn_e = "555-456-7890";
+	long long ab_e = 55555;
+
+	MemberAccountNode node_e = MemberAccountNode(accid_e, fn_e, ln_e, pn_e, ab_e);
+
+
+
+	testTree.addNode(&node_a);
+	testTree.addNode(&node_b);
+	testTree.addNode(&node_c);
+	testTree.addNode(&node_d);
+	testTree.addNode(&node_e);
+
+
+
+	testTree.removeNode(&node_c);
+
+	return true;
+}
+
 int main(int argv, char* argc[]) {
 	std::string accFilename = "account_db.bin";
 	std::fstream fs;
@@ -132,6 +194,8 @@ int main(int argv, char* argc[]) {
 			break;
 		case 3:
 			std::cout << "Withdraw Funds\n" << std::endl;
+			BSTTesting(fs, accFilename);
+
 			break;
 		case 4:
 			std::cout << "Deposit Funds\n" << std::endl;

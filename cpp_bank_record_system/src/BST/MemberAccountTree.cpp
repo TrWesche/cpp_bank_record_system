@@ -34,6 +34,7 @@ bool MemberAccountTree::addNode(BSTNode* add_node)
 		{
 			if (comparisonNode->right_branch == nullptr) {
 				comparisonNode->right_branch = operationNode;
+				operationNode->source_node = comparisonNode;
 				insertComplete = true;
 				rSuccess = true;
 			}
@@ -46,6 +47,7 @@ bool MemberAccountTree::addNode(BSTNode* add_node)
 			if (comparisonNode->left_branch == nullptr) 
 			{
 				comparisonNode->left_branch = operationNode;
+				operationNode->source_node = comparisonNode;
 				insertComplete = true;
 				rSuccess = true;
 			}
@@ -96,6 +98,7 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 			if (rgtBranchNode != nullptr && !removeComplete) {
 				// Handle case where there are no leafs down the left side of the right branch from the node removed point.
 				if (rgtBranchNode->left_branch == nullptr) {
+					//TODO::: The functionality for swapping out nodes still needs some work, need to make sure the source node updates where it is pointing to properly
 					rgtBranchNode->source_node = comparisonNode->source_node;
 					rgtBranchNode->left_branch = comparisonNode->left_branch;
 				}
@@ -144,7 +147,8 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 					comparisonNode->source_node->left_branch != nullptr &&
 					comparisonNode->account_id == static_cast<MemberAccountNode*>(comparisonNode->source_node->left_branch)->account_id) 
 				{
-						comparisonNode->source_node->left_branch = nullptr;
+					comparisonNode->source_node->left_branch = nullptr;
+					removeComplete = true;
 				}
 				else if (
 					comparisonNode->source_node != nullptr &&
@@ -152,11 +156,28 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 					comparisonNode->account_id == static_cast<MemberAccountNode*>(comparisonNode->source_node->right_branch)->account_id)
 				{
 					comparisonNode->source_node->right_branch = nullptr;
+					removeComplete = true;
 				}
 				else
 				{
 					std::cout << "Error while removing node from the tree, comparison node not found on source" << std::endl;
 				}
+			}
+		}
+
+		if (!removeComplete) {
+			if (operationNode->account_id > comparisonNode->account_id) {
+				comparisonNode = static_cast<MemberAccountNode*>(comparisonNode->right_branch);
+			}
+			else
+			{
+				comparisonNode = static_cast<MemberAccountNode*>(comparisonNode->left_branch);
+			}
+
+			if (comparisonNode == nullptr) {
+				removeComplete = true;
+				rSuccess = false;
+				std::cout << "Node not found" << std::endl;
 			}
 		}
 	}

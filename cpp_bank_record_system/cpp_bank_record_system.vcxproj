@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\BST\BST_Node.cpp" />
+    <ClCompile Include="src\BST\BST_Tree.cpp" />
     <ClCompile Include="src\BST\MemberAccountTree.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MemberAccount.cpp" />
