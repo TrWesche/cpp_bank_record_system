@@ -140,11 +140,16 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 
 			// If the remove operation still is not complete the node removed was a leaf itself.  It's source needs to have its pointer cleared in the tree
 			if (!removeComplete) {
-				if (comparisonNode->account_id == static_cast<MemberAccountNode*>(comparisonNode->source_node->left_branch)->account_id) {
-					comparisonNode->source_node->left_branch = nullptr;
+				if (comparisonNode->source_node != nullptr && 
+					comparisonNode->source_node->left_branch != nullptr &&
+					comparisonNode->account_id == static_cast<MemberAccountNode*>(comparisonNode->source_node->left_branch)->account_id) 
+				{
+						comparisonNode->source_node->left_branch = nullptr;
 				}
-				// Once functionality has been verified this additional if comparison & cast can be removed.
-				else if (comparisonNode->account_id == static_cast<MemberAccountNode*>(comparisonNode->source_node->right_branch)->account_id)
+				else if (
+					comparisonNode->source_node != nullptr &&
+					comparisonNode->source_node->right_branch != nullptr &&
+					comparisonNode->account_id == static_cast<MemberAccountNode*>(comparisonNode->source_node->right_branch)->account_id)
 				{
 					comparisonNode->source_node->right_branch = nullptr;
 				}
