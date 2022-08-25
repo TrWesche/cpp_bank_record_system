@@ -9,7 +9,7 @@
 
 
 
-MemberAccountNode::MemberAccountNode(long acc_id, std::string fname, std::string lname, std::string phone, long long balance) : BSTNode(nullptr, nullptr)
+MemberAccountNode::MemberAccountNode(long acc_id, std::string fname, std::string lname, std::string phone, long long balance) : BSTNode(nullptr, nullptr, nullptr)
 {
 	account_id = acc_id;
 	first_name = fname;
@@ -20,7 +20,7 @@ MemberAccountNode::MemberAccountNode(long acc_id, std::string fname, std::string
 
 
 
-SimpleNode::SimpleNode(int data) : BSTNode(nullptr, nullptr)
+SimpleNode::SimpleNode(int data) : BSTNode(nullptr, nullptr, nullptr)
 {
 	data_internal = data;
 }

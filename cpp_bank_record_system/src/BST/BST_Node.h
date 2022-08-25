@@ -15,8 +15,9 @@
 
 class BSTNode {
 public:
-	BSTNode(BSTNode* lbranch, BSTNode* rbranch): left_branch(lbranch), right_branch(rbranch) {};
+	BSTNode(BSTNode* snode, BSTNode* lbranch, BSTNode* rbranch): source_node(snode), left_branch(lbranch), right_branch(rbranch) {};
 
+	BSTNode* source_node = nullptr;
 	BSTNode* left_branch = nullptr;
 	BSTNode* right_branch = nullptr;
 };
