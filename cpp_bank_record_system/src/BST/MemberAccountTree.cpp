@@ -81,6 +81,7 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 
 	bool rSuccess = false;
 	bool removeComplete = false;
+	int depthFromSwap = 0;
 	MemberAccountNode* comparisonNode = static_cast<MemberAccountNode*>(getTreeRoot());
 	MemberAccountNode* swapNode;
 
@@ -94,16 +95,17 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 
 				while (swapNode->left_branch != nullptr) {
 					swapNode = static_cast<MemberAccountNode*>(swapNode->left_branch);
+					depthFromSwap++;
 				}
 
 
 				// If there are children nodes on the right branch from the selected swap node these need to be relinked
-				if (swapNode->right_branch != nullptr) {
+				if (swapNode->right_branch != nullptr && depthFromSwap > 0) {
 					swapNode->source_node->left_branch = swapNode->right_branch;
 					swapNode->right_branch->source_node = swapNode->source_node;
 				}
 				// Else the swap node was a leaf and we need to update the precusor node to to be nullptr on its left branch
-				else
+				else if (depthFromSwap > 0)
 				{
 					swapNode->source_node->left_branch = nullptr;
 				}
@@ -128,7 +130,11 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 				// Update the Swap Node to point to the locations the comparision node used to
 				swapNode->source_node = comparisonNode->source_node;
 				swapNode->left_branch = comparisonNode->left_branch;
-				swapNode->right_branch = comparisonNode->right_branch;
+
+				if (depthFromSwap > 0) {
+					swapNode->right_branch = comparisonNode->right_branch;
+				}
+				
 
 				// We are done with the remove node operation, return space allocated for the comparisonNode back to the operating system
 				removeComplete = true;
@@ -141,16 +147,17 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 
 				while (swapNode->right_branch != nullptr) {
 					swapNode = static_cast<MemberAccountNode*>(swapNode->right_branch);
+					depthFromSwap++;
 				}
 
 
 				// If there are children nodes on the right branch from the selected swap node these need to be relinked
-				if (swapNode->left_branch != nullptr) {
+				if (swapNode->left_branch != nullptr && depthFromSwap > 0) {
 					swapNode->source_node->right_branch = swapNode->left_branch;
 					swapNode->left_branch->source_node = swapNode->source_node;
 				}
 				// Else the swap node was a leaf and we need to update the precusor node to to be nullptr on its left branch
-				else
+				else if (depthFromSwap > 0)
 				{
 					swapNode->source_node->right_branch = nullptr;
 				}
@@ -174,8 +181,10 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 
 				// Update the Swap Node to point to the locations the comparision node used to
 				swapNode->source_node = comparisonNode->source_node;
-				swapNode->left_branch = comparisonNode->left_branch;
 				swapNode->right_branch = comparisonNode->right_branch;
+				if (depthFromSwap > 0) {
+					swapNode->left_branch = comparisonNode->left_branch;
+				}
 
 				// We are done with the remove node operation, return space allocated for the comparisonNode back to the operating system
 				removeComplete = true;
