@@ -82,64 +82,105 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 	bool rSuccess = false;
 	bool removeComplete = false;
 	MemberAccountNode* comparisonNode = static_cast<MemberAccountNode*>(getTreeRoot());
-	MemberAccountNode* lftBranchNode;
-	MemberAccountNode* rgtBranchNode;
 	MemberAccountNode* swapNode;
 
+	// Search for the target node
 	while (!removeComplete) {
-		// Found the Target Node
+		// Target Node Found
 		if (operationNode->account_id == comparisonNode->account_id) {
-			// Save the pointers to the removed node's left and right branches
-			// Might not need to do this, all of this information will exist on the comparison node (it will have the source_node, its left branch, and its right branch)
-			rgtBranchNode = static_cast<MemberAccountNode*>(comparisonNode->right_branch);
-			lftBranchNode = static_cast<MemberAccountNode*>(comparisonNode->left_branch);
-			
-			// If the right branch node exists we need to find the leaf to swap in to keep the tree consistant (furtherst left leaf of the right branch)
-			if (rgtBranchNode != nullptr && !removeComplete) {
-				// Handle case where there are no leafs down the left side of the right branch from the node removed point.
-				if (rgtBranchNode->left_branch == nullptr) {
-					//TODO::: The functionality for swapping out nodes still needs some work, need to make sure the source node updates where it is pointing to properly
-					rgtBranchNode->source_node = comparisonNode->source_node;
-					rgtBranchNode->left_branch = comparisonNode->left_branch;
+			// If the right branch node exists we need to find the leaf to swap in to keep the tree consistant (furtherst left leaf off the first node of the right branch)
+			if (static_cast<MemberAccountNode*>(comparisonNode->right_branch) != nullptr && !removeComplete) {
+				swapNode = static_cast<MemberAccountNode*>(comparisonNode->right_branch);
+
+				while (swapNode->left_branch != nullptr) {
+					swapNode = static_cast<MemberAccountNode*>(swapNode->left_branch);
 				}
-				// Otherwise we need to iterate down the left branch from the right node to find the furtherest left node
-				else 
+
+
+				// If there are children nodes on the right branch from the selected swap node these need to be relinked
+				if (swapNode->right_branch != nullptr) {
+					swapNode->source_node->left_branch = swapNode->right_branch;
+					swapNode->right_branch->source_node = swapNode->source_node;
+				}
+				// Else the swap node was a leaf and we need to update the precusor node to to be nullptr on its left branch
+				else
 				{
-					swapNode = rgtBranchNode;
-					while (swapNode->left_branch != nullptr) {
-						swapNode = static_cast<MemberAccountNode*>(swapNode->left_branch);
-					}
-					// Once the swap node has been identified we need to clear the link to the swap node from its current source, and reassign it to the position in the tree that the comparison node held.
 					swapNode->source_node->left_branch = nullptr;
-					swapNode->source_node = comparisonNode->source_node;
-					swapNode->left_branch = comparisonNode->left_branch;
-					swapNode->right_branch = comparisonNode->right_branch;
 				}
+
+
+				// If the Source of the Comparison Node is not null we need to reassign the source not to point to the swapNode
+				if (comparisonNode->source_node != nullptr) {
+					comparisonNode->source_node->right_branch = swapNode;
+				}
+
+
+				// If there is a left branch from the comparison node update its source to point to the swapNode
+				if (comparisonNode->left_branch != nullptr) {
+					comparisonNode->left_branch->source_node = swapNode;
+				}
+
+				// If there is a right branch from the comparison node update its source to point to the swapNode
+				if (comparisonNode->right_branch != nullptr) {
+					comparisonNode->right_branch->source_node = swapNode;
+				}
+
+				// Update the Swap Node to point to the locations the comparision node used to
+				swapNode->source_node = comparisonNode->source_node;
+				swapNode->left_branch = comparisonNode->left_branch;
+				swapNode->right_branch = comparisonNode->right_branch;
+
+				// We are done with the remove node operation, return space allocated for the comparisonNode back to the operating system
 				removeComplete = true;
 			}
 
-			// If the left branch node exists and a node from the right side of the tree hasn't already been switched in we need to find a swap in from the left (furthest right left of the left branch)
-			if (lftBranchNode != nullptr && !removeComplete) {
-				// Handle case where there are no leafs down the right side of the left branch from the node removed point.
-				if (lftBranchNode->right_branch == nullptr) {
-					lftBranchNode->source_node = comparisonNode->source_node;
-					lftBranchNode->right_branch = comparisonNode->right_branch;
+
+			// If the remove operation is not complete and the left branch node exists we need to find the leaf to swap in to keep the tree consistant (furtherst right leaf of the left branch)
+			if (static_cast<MemberAccountNode*>(comparisonNode->left_branch) != nullptr && !removeComplete) {
+				swapNode = static_cast<MemberAccountNode*>(comparisonNode->left_branch);
+
+				while (swapNode->right_branch != nullptr) {
+					swapNode = static_cast<MemberAccountNode*>(swapNode->right_branch);
 				}
-				// Otherwise we need to iterate down the left branch from the right node to find the furtherest left node
+
+
+				// If there are children nodes on the right branch from the selected swap node these need to be relinked
+				if (swapNode->left_branch != nullptr) {
+					swapNode->source_node->right_branch = swapNode->left_branch;
+					swapNode->left_branch->source_node = swapNode->source_node;
+				}
+				// Else the swap node was a leaf and we need to update the precusor node to to be nullptr on its left branch
 				else
 				{
-					swapNode = lftBranchNode;
-					while (swapNode->right_branch != nullptr) {
-						swapNode = static_cast<MemberAccountNode*>(swapNode->right_branch);
-					}
-					// Once the swap node has been identified we need to clear the link to the swap node from its current source, and reassign it to the position in the tree that the comparison node held.
 					swapNode->source_node->right_branch = nullptr;
-					swapNode->source_node = comparisonNode->source_node;
-					swapNode->left_branch = comparisonNode->left_branch;
-					swapNode->right_branch = comparisonNode->right_branch;
 				}
+
+
+				// If the Source of the Comparison Node is not null we need to reassign the source not to point to the swapNode
+				if (comparisonNode->source_node != nullptr) {
+					comparisonNode->source_node->left_branch = swapNode;
+				}
+
+
+				// If there is a left branch from the comparison node update its source to point to the swapNode
+				if (comparisonNode->left_branch != nullptr) {
+					comparisonNode->left_branch->source_node = swapNode;
+				}
+
+				// If there is a right branch from the comparison node update its source to point to the swapNode
+				if (comparisonNode->right_branch != nullptr) {
+					comparisonNode->right_branch->source_node = swapNode;
+				}
+
+				// Update the Swap Node to point to the locations the comparision node used to
+				swapNode->source_node = comparisonNode->source_node;
+				swapNode->left_branch = comparisonNode->left_branch;
+				swapNode->right_branch = comparisonNode->right_branch;
+
+				// We are done with the remove node operation, return space allocated for the comparisonNode back to the operating system
 				removeComplete = true;
 			}
+
 
 			// If the remove operation still is not complete the node removed was a leaf itself.  It's source needs to have its pointer cleared in the tree
 			if (!removeComplete) {
@@ -165,7 +206,13 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 			}
 		}
 
-		if (!removeComplete) {
+		if (removeComplete) {
+			// Need to make sure this is using heap storage, might not be right now
+			//			delete comparisonNode;
+			return rSuccess;
+		} 
+		else
+		{
 			if (operationNode->account_id > comparisonNode->account_id) {
 				comparisonNode = static_cast<MemberAccountNode*>(comparisonNode->right_branch);
 			}
