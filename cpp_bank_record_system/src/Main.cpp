@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <vector>
 #include <fstream>
 #include <string>
 #include "MemberAccount.h"
@@ -16,8 +17,9 @@
 * 7. Update BST Data Store on BST Data Modifiation (When the data in the BST is updated the file store will need to be updated to match - this is not very efficient but for a first time through its fine)
 */
 
-bool openAccount(std::fstream& fs, std::string& filename) {
-	fs.open(filename, /* std::ios_base::binary | */ std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
+//bool openAccount(std::fstream& fs, std::string& filename) {
+bool openAccount(std::string& filename) {
+	std::fstream fs(filename, std::ios_base::binary | std::ios_base::out | std::ios_base::app);
 	if (!fs.is_open()) {
 		std::cout << "Open Account Operation Failed - Unable to Open DB File";
 		return false;
@@ -33,21 +35,6 @@ bool openAccount(std::fstream& fs, std::string& filename) {
 	MemberAccount* account = new MemberAccount(AccountID, FirstName, LastName, PhoneNumber, AccountBalance);
 	std::string accountString = account->CreateEntry();
 	fs.write(accountString.c_str(), sizeof accountString);
-
-
-	//fs.seekp(0);
-
-	//int lineno = 0;
-	//while (!fs.eof()) {
-	//	fs >> lineno;
-	//	std::cout << lineno;
-	//}
-	auto size = fs.tellg();
-	std::string str(size, '\0');
-	fs.seekg(0);
-	if (fs.read(&str[0], size))
-		std::cout << str << '\n';
-
 
 	fs.close();
 	return true;
@@ -101,6 +88,29 @@ bool accWithdraw(std::fstream& fs, std::string& filename) {
 	return true;
 }
 
+void readDBInfo(std::string& filename) {
+	std::fstream fs(filename, std::ios_base::binary | std::ios_base::in);
+	std::string accDataString;
+	std::vector<std::string> fileIterator;
+
+	if (!fs.is_open()) {
+		std::cout << "Unable to Open Database File" << std::endl;
+		return;
+	}
+
+	while (!fs.eof()) {
+		std::getline(fs, accDataString);
+		fileIterator.push_back(accDataString);
+	}
+
+	for (int i = 0; i < fileIterator.size(); i++) {
+		std::cout << fileIterator[i] << std::endl;
+	}
+
+	fs.close();
+	return;
+}
+
 int main(int argv, char* argc[]) {
 	std::string accFilename = "account_db.bin";
 	std::fstream fs;
@@ -128,7 +138,7 @@ int main(int argv, char* argc[]) {
 		{
 		case 1:
 			std::cout << "Open An Account\n" << std::endl;
-			openAccount(fs, accFilename);
+			openAccount(accFilename);
 			
 			break;
 		case 2:
@@ -138,6 +148,8 @@ int main(int argv, char* argc[]) {
 			break;
 		case 3:
 			std::cout << "Withdraw Funds\n" << std::endl;
+
+			readDBInfo(accFilename);
 
 			break;
 		case 4:

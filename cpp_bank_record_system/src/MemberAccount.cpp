@@ -13,7 +13,7 @@ MemberAccount::MemberAccount(long accID, std::string First, std::string Last, st
 std::string MemberAccount::CreateEntry()
 {
 	std::string rval;
-	std::string delim = "\n";
+	std::string delim = "\t";
 	rval.append(std::to_string(AccountID))
 		.append(delim)
 		.append(FirstName)
@@ -22,7 +22,8 @@ std::string MemberAccount::CreateEntry()
 		.append(delim)
 		.append(PhoneNumber)
 		.append(delim)
-		.append(std::to_string(AccountBalance));
+		.append(std::to_string(AccountBalance))
+		.append("\n");
 	return rval;
 }
 

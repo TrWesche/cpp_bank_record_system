@@ -122,8 +122,6 @@ MemberAccountTree BuildTestTree() {
 
 
 bool BSTRemoveTest(MemberAccountTree& testTree, long removeID) {
-	MemberAccountTree testTree;
-
 	std::string fn = "FirstName";
 	std::string ln = "LastName";
 	std::string pn = "123-456-7890";

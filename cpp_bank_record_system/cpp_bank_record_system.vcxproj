@@ -147,7 +147,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\BST\BST_CodeArchive.cpp" />
     <ClCompile Include="src\BST\BST_Node.cpp" />
+    <ClCompile Include="src\BST\BSTTest.cpp" />
     <ClCompile Include="src\BST\BST_Tree.cpp" />
     <ClCompile Include="src\BST\MemberAccountTree.cpp" />
     <ClCompile Include="src\Main.cpp" />
