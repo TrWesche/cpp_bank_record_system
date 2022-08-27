@@ -112,8 +112,17 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 
 
 				// If the Source of the Comparison Node is not null we need to reassign the source not to point to the swapNode
-				if (comparisonNode->source_node != nullptr) {
+				if (comparisonNode->source_node != nullptr && static_cast<MemberAccountNode*>(comparisonNode->source_node->right_branch)->account_id == comparisonNode->account_id ) 
+				{
 					comparisonNode->source_node->right_branch = swapNode;
+				} 
+				else if (comparisonNode->source_node != nullptr && static_cast<MemberAccountNode*>(comparisonNode->source_node->left_branch)->account_id == comparisonNode->account_id) 
+				{
+					comparisonNode->source_node->left_branch = swapNode;
+				}
+				else if (comparisonNode->source_node == nullptr) // Comparison Node is the Root
+				{
+					this->setTreeRoot(swapNode);
 				}
 
 
@@ -164,8 +173,17 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 
 
 				// If the Source of the Comparison Node is not null we need to reassign the source not to point to the swapNode
-				if (comparisonNode->source_node != nullptr) {
+				if (comparisonNode->source_node != nullptr && static_cast<MemberAccountNode*>(comparisonNode->source_node->right_branch)->account_id == comparisonNode->account_id) 
+				{
+					comparisonNode->source_node->right_branch = swapNode;
+				}
+				else if (comparisonNode->source_node != nullptr && static_cast<MemberAccountNode*>(comparisonNode->source_node->left_branch)->account_id == comparisonNode->account_id) 
+				{
 					comparisonNode->source_node->left_branch = swapNode;
+				}
+				else if (comparisonNode->source_node == nullptr) // Comparison Node is the Root
+				{
+					this->setTreeRoot(swapNode);
 				}
 
 
