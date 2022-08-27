@@ -242,3 +242,18 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 
 	return rSuccess;
 }
+
+void MemberAccountTree::printTree(MemberAccountNode* node, int depth)
+{
+	if (node != nullptr) {
+		if (node->left_branch != nullptr) {
+			printTree(static_cast<MemberAccountNode*>(node->left_branch), depth + 1);
+		}
+
+		if (node->right_branch != nullptr) {
+			printTree(static_cast<MemberAccountNode*>(node->right_branch), depth + 1);
+		}
+
+		std::cout << depth << ":  " << node->account_id << std::endl;
+	}
+}

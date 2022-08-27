@@ -14,4 +14,7 @@ public:
 	bool addNode(BSTNode* add_node) override;
 
 	bool removeNode(BSTNode* remove_node) override;
+
+	void printTree(MemberAccountNode* node, int depth = 0);
+
 };
