@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <fstream>
 #include <string>
@@ -18,21 +19,61 @@
 */
 
 //bool openAccount(std::fstream& fs, std::string& filename) {
-bool openAccount(std::string& filename) {
-	std::fstream fs(filename, std::ios_base::binary | std::ios_base::out | std::ios_base::app);
-	if (!fs.is_open()) {
-		std::cout << "Open Account Operation Failed - Unable to Open DB File";
+bool openAccount(std::string& filename, std::string& dbFilename) {
+	long accountID = 1;
+
+	std::fstream dbc_fs(dbFilename, std::ios_base::binary | std::ios_base::out | std::ios_base::in | std::ios_base::app);
+	std::string dbTableInfo;
+	std::vector<std::string> dbCoreIterator;
+	if (!dbc_fs.is_open()) {
+		std::cout << "Open Account Operation Failed - Unable to open the DB Core File" << std::endl;
 		return false;
 	}
 
-	long AccountID = 1;
+	while (!dbc_fs.eof()) {
+		std::getline(dbc_fs, dbTableInfo);
+		if (dbTableInfo.find(filename) != std::string::npos) {
+			dbCoreIterator.push_back(dbTableInfo);
+		}
+	}
+
+	if (dbCoreIterator.size() != 0) 
+	{
+		size_t idx = dbCoreIterator[0].find("\tidx:");
+		std::cout << dbCoreIterator[0] << std::endl;
+		//std::cout << dbCoreIterator[0].substr(idx + 4, 19);
+		//accountID = atol( dbCoreIterator[0].substr(idx + 4, 19).c_str() ) ;
+		accountID = 2;
+	}
+
+	//std::string accIDString = std::ostringstream(std::internal << std::setfill('0') << std::setw(19) << accountID).str();
+
+	std::string dbcinputstring = filename + "\t" + std::to_string(accountID);
+	/*dbc_fs << filename << "\tidx:";
+	dbc_fs << std::internal << std::setfill('0') << std::setw(19) << accountID;
+	dbc_fs << std::left << std::setfill(' ');
+	dbc_fs << std::endl;*/
+	
+	dbc_fs.write(dbcinputstring.c_str(), sizeof dbcinputstring);
+
+	
+
+	std::fstream fs(filename, std::ios_base::binary | std::ios_base::out | std::ios_base::app);
+	if (!fs.is_open()) {
+		std::cout << "Open Account Operation Failed - Unable to Open DB File" << std::endl;
+		return false;
+	}
+
+
+
+	//long AccountID = 1;
 	std::string FirstName = "FirstName1";
 	std::string LastName = "LastName1";
 	std::string PhoneNumber = "123-456-7890";
 	long long AccountBalance = 123;
 
 
-	MemberAccount* account = new MemberAccount(AccountID, FirstName, LastName, PhoneNumber, AccountBalance);
+	MemberAccount* account = new MemberAccount(accountID, FirstName, LastName, PhoneNumber, AccountBalance);
 	std::string accountString = account->CreateEntry();
 	fs.write(accountString.c_str(), sizeof accountString);
 
@@ -112,7 +153,8 @@ void readDBInfo(std::string& filename) {
 }
 
 int main(int argv, char* argc[]) {
-	std::string accFilename = "account_db.bin";
+	std::string dbFilename = "db_core.bin";					// This binary file will be used to track current table indicies
+	std::string accFilename = "account_db.bin";			// This binary file will act as the account db table for storing the account data
 	std::fstream fs;
 	bool runApp = true;
 	
@@ -138,7 +180,7 @@ int main(int argv, char* argc[]) {
 		{
 		case 1:
 			std::cout << "Open An Account\n" << std::endl;
-			openAccount(accFilename);
+			openAccount(accFilename, dbFilename);
 			
 			break;
 		case 2:
