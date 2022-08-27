@@ -15,6 +15,6 @@ public:
 
 	bool removeNode(BSTNode* remove_node) override;
 
-	void printTree(MemberAccountNode* node, int depth = 0);
+	std::string printTree(MemberAccountNode* node, int depth = 0);
 
 };
