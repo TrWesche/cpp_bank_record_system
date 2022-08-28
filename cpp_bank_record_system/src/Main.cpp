@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 #include <vector>
 #include <fstream>
@@ -21,50 +22,75 @@
 //bool openAccount(std::fstream& fs, std::string& filename) {
 bool openAccount(std::string& filename, std::string& dbFilename) {
 	long accountID = 1;
+	std::string dbCoreRead;
+	std::vector<std::string> dbCoreIteratorUpd;
+	std::vector<std::string> dbCoreIteratorNoUpd;
 
-	std::fstream dbc_fs(dbFilename, std::ios_base::binary | std::ios_base::out | std::ios_base::in | std::ios_base::app);
-	std::string dbTableInfo;
-	std::vector<std::string> dbCoreIterator;
-	if (!dbc_fs.is_open()) {
+	// Read In DB Core Data
+	std::fstream dbc_is(dbFilename, std::ios_base::binary | std::ios_base::in);
+	if (dbc_is.is_open()) {
+		while (!dbc_is.eof()) {
+			std::getline(dbc_is, dbCoreRead);
+			if (dbCoreRead.find(filename) != std::string::npos) {
+				dbCoreIteratorUpd.push_back(dbCoreRead);
+			}
+			else
+			{
+				dbCoreIteratorNoUpd.push_back(dbCoreRead);
+			}
+		}
+
+		if (dbCoreIteratorUpd.size() != 0)
+		{
+			size_t idx = dbCoreIteratorUpd[0].find("\t idx:");
+			accountID = atol(dbCoreIteratorUpd[0].substr(idx + 6, 19).c_str() ) + 1;
+		}
+
+		dbc_is.close();
+	}
+
+
+	// Create Temporary File and Write Updates
+	std::fstream dbct_os("db_core_temp.bin", std::ios_base::binary | std::ios_base::out | std::ios_base::app);
+	if (!dbct_os.is_open()) {
+		std::cout << "Open Account Operation Failed - Failed to Create Update File" << std::endl;
+		return false;
+	}
+
+	for (std::vector<std::string>::iterator it = dbCoreIteratorUpd.begin(); it != dbCoreIteratorUpd.end(); ++it) {
+		dbct_os.write(it->c_str(), sizeof * it);
+	}
+
+	for (std::vector<std::string>::iterator it = dbCoreIteratorNoUpd.begin(); it != dbCoreIteratorNoUpd.end(); ++it) {
+		dbct_os.write(it->c_str(), sizeof * it);
+	}
+
+	dbct_os.close();
+
+	// Update the Core Data with the New Tracking Index
+	std::fstream dbc_os(dbFilename, std::ios_base::binary | std::ios_base::out | std::ios_base::app);
+	if (!dbc_os.is_open()) {
 		std::cout << "Open Account Operation Failed - Unable to open the DB Core File" << std::endl;
 		return false;
 	}
 
-	while (!dbc_fs.eof()) {
-		std::getline(dbc_fs, dbTableInfo);
-		if (dbTableInfo.find(filename) != std::string::npos) {
-			dbCoreIterator.push_back(dbTableInfo);
-		}
-	}
+	std::ostringstream accIDString;
+	accIDString << std::setw(19) << std::setfill('0') << accountID;
 
-	if (dbCoreIterator.size() != 0) 
-	{
-		size_t idx = dbCoreIterator[0].find("\tidx:");
-		std::cout << dbCoreIterator[0] << std::endl;
-		//std::cout << dbCoreIterator[0].substr(idx + 4, 19);
-		//accountID = atol( dbCoreIterator[0].substr(idx + 4, 19).c_str() ) ;
-		accountID = 2;
-	}
+	//std::cout << "Writing to DBCore File\n" << dbcinputstring.c_str() << " size: " << sizeof dbcinputstring << std::endl;
 
-	//std::string accIDString = std::ostringstream(std::internal << std::setfill('0') << std::setw(19) << accountID).str();
+	std::string dbcinputstring = filename + "\t idx:" + accIDString.str();
+	dbc_os.write(dbcinputstring.c_str(), sizeof dbcinputstring);
 
-	std::string dbcinputstring = filename + "\t" + std::to_string(accountID);
-	/*dbc_fs << filename << "\tidx:";
-	dbc_fs << std::internal << std::setfill('0') << std::setw(19) << accountID;
-	dbc_fs << std::left << std::setfill(' ');
-	dbc_fs << std::endl;*/
-	
-	dbc_fs.write(dbcinputstring.c_str(), sizeof dbcinputstring);
+	dbc_os.close();
 
-	
 
+	// Update the Account Table
 	std::fstream fs(filename, std::ios_base::binary | std::ios_base::out | std::ios_base::app);
 	if (!fs.is_open()) {
 		std::cout << "Open Account Operation Failed - Unable to Open DB File" << std::endl;
 		return false;
 	}
-
-
 
 	//long AccountID = 1;
 	std::string FirstName = "FirstName1";
