@@ -10,7 +10,7 @@
 #include "BST/MemberAccountTree.h"
 
 /* TODOS:
-* 1. Write BST Data to File on Account Creation (A new account can be appended to the end of the file, do not need to rebuild the store)
+* 1. Write BST Data to File on Account Creation (A new account can be appended to the end of the file, do not need to rebuild the store): Complete
 * 2. Read BST Data from File on Program Launch (Need to figure out how to sequence through data in file stream to build the BST data structure on program start from a data store)
 * 3. Implement a search function based on account number to retrieve target user data
 * 4. Update BST Tree on Withdrawl
@@ -24,7 +24,7 @@ bool openAccount(std::string& filename, std::string& dbFilename) {
 	long accountID = 1;
 	std::string dbCoreRead;
 	std::vector<std::string> dbCoreIteratorUpd;
-	std::vector<std::string> dbCoreIteratorNoUpd;
+	std::vector<std::string> dbCoreIterator;
 
 	// Read In DB Core Data
 	std::fstream dbc_is(dbFilename, std::ios_base::binary | std::ios_base::in);
@@ -36,53 +36,65 @@ bool openAccount(std::string& filename, std::string& dbFilename) {
 			}
 			else
 			{
-				dbCoreIteratorNoUpd.push_back(dbCoreRead);
+				dbCoreIterator.push_back(dbCoreRead);
 			}
 		}
 
 		if (dbCoreIteratorUpd.size() != 0)
 		{
+			// Get the Previous Tracking Value
 			size_t idx = dbCoreIteratorUpd[0].find("\t idx:");
 			accountID = atol(dbCoreIteratorUpd[0].substr(idx + 6, 19).c_str() ) + 1;
+
+			// Update the entry to represent the new Tracking Value
+			std::ostringstream accIDString;
+			accIDString << std::setw(19) << std::setfill('0') << accountID;
+
+			// Add it to the iterator which will create the new file
+			dbCoreIterator.push_back(filename + "\t idx:" + accIDString.str());
 		}
 
 		dbc_is.close();
 	}
 
 
-	// Create Temporary File and Write Updates
-	std::fstream dbct_os("db_core_temp.bin", std::ios_base::binary | std::ios_base::out | std::ios_base::app);
-	if (!dbct_os.is_open()) {
-		std::cout << "Open Account Operation Failed - Failed to Create Update File" << std::endl;
-		return false;
+	if (dbCoreIteratorUpd.size() != 0) {
+		// Create Temporary File and Write Updates
+		std::fstream dbct_os("db_core_temp.bin", std::ios_base::binary | std::ios_base::out | std::ios_base::app);
+		if (!dbct_os.is_open()) {
+			std::cout << "Open Account Operation Failed - Failed to Create Update File" << std::endl;
+			return false;
+		}
+
+		for (std::vector<std::string>::iterator it = dbCoreIterator.begin(); it != dbCoreIterator.end(); ++it) {
+			dbct_os.write(it->c_str(), sizeof * it);
+		}
+
+		dbct_os.close();
+
+		remove(dbFilename.c_str());
+		int renameCheck = rename("db_core_temp.bin", dbFilename.c_str());
+		if (renameCheck != 0) {
+			perror("Error encountered when renaming file");
+			return false;
+		}
 	}
+	else
+	{
+		std::fstream dbc_os(dbFilename, std::ios_base::binary | std::ios_base::out | std::ios_base::app);
+		if (!dbc_os.is_open()) {
+			std::cout << "Open Account Operation Failed - Unable to open the DB Core File" << std::endl;
+			return false;
+		}
 
-	for (std::vector<std::string>::iterator it = dbCoreIteratorUpd.begin(); it != dbCoreIteratorUpd.end(); ++it) {
-		dbct_os.write(it->c_str(), sizeof * it);
+		std::ostringstream accIDString;
+		accIDString << std::setw(19) << std::setfill('0') << accountID;
+
+		std::string dbcinputstring = filename + "\t idx:" + accIDString.str();
+		dbc_os.write(dbcinputstring.c_str(), sizeof dbcinputstring);
+
+		dbc_os.close();
 	}
-
-	for (std::vector<std::string>::iterator it = dbCoreIteratorNoUpd.begin(); it != dbCoreIteratorNoUpd.end(); ++it) {
-		dbct_os.write(it->c_str(), sizeof * it);
-	}
-
-	dbct_os.close();
-
-	// Update the Core Data with the New Tracking Index
-	std::fstream dbc_os(dbFilename, std::ios_base::binary | std::ios_base::out | std::ios_base::app);
-	if (!dbc_os.is_open()) {
-		std::cout << "Open Account Operation Failed - Unable to open the DB Core File" << std::endl;
-		return false;
-	}
-
-	std::ostringstream accIDString;
-	accIDString << std::setw(19) << std::setfill('0') << accountID;
-
-	//std::cout << "Writing to DBCore File\n" << dbcinputstring.c_str() << " size: " << sizeof dbcinputstring << std::endl;
-
-	std::string dbcinputstring = filename + "\t idx:" + accIDString.str();
-	dbc_os.write(dbcinputstring.c_str(), sizeof dbcinputstring);
-
-	dbc_os.close();
 
 
 	// Update the Account Table
