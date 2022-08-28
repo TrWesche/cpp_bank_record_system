@@ -11,7 +11,7 @@
 
 /* TODOS:
 * 1. Write BST Data to File on Account Creation (A new account can be appended to the end of the file, do not need to rebuild the store): Complete
-* 2. Read BST Data from File on Program Launch - Ready to Implement
+* 2. Read BST Data from File on Program Launch: Complete
 * 3. Implement a search function based on account number to retrieve target user data - Ready to Implement
 * 4. Setup user input during account creation
 * 5. Update BST Tree on Withdrawl
@@ -191,10 +191,84 @@ void readDBInfo(std::string& filename) {
 	return;
 }
 
+void buildAccDBTree(std::string& filename, MemberAccountTree& OutOperationTree) {
+	std::fstream fs(filename, std::ios_base::binary | std::ios_base::in);
+	std::string accDataString;
+	std::vector<std::string> fileIterator;
+
+	if (!fs.is_open()) {
+		std::cout << "Database File Not Found, First Initialization" << std::endl;
+		return;
+	}
+
+	while (!fs.eof()) {
+		std::getline(fs, accDataString);
+		fileIterator.push_back(accDataString);
+	}
+
+	for (int i = 0; i < fileIterator.size(); i++) {
+		long accID = 0;
+		std::string firstName = "";
+		std::string lastName = "";
+		std::string phoneNumber = "";
+		long long accBalance = 0;
+
+		int colIdx = 0;
+		size_t startPos = 0;
+		size_t endPos = 0;
+
+		while (startPos != std::string::npos) {
+			endPos = fileIterator[i].find('\t', startPos);
+			switch (colIdx)
+			{
+			case 0:
+				accID = atol(fileIterator[i].substr(startPos, endPos - startPos).c_str());
+				break;
+			case 1:
+				firstName = fileIterator[i].substr(startPos, endPos - startPos);
+				break;
+			case 2:
+				lastName = fileIterator[i].substr(startPos, endPos - startPos);
+				break;
+			case 3:
+				phoneNumber = fileIterator[i].substr(startPos, endPos - startPos);
+				break;
+			case 4:
+				accBalance = atoll(fileIterator[i].substr(startPos, endPos - startPos).c_str());
+				break;
+			default:
+				break;
+			}
+
+			if (endPos == std::string::npos)
+			{
+				startPos = endPos;
+			}
+			else
+			{
+				startPos = endPos + 1;
+			}
+
+			colIdx++;
+		}
+
+		if (accID != 0) {
+			OutOperationTree.addNode(static_cast<BSTNode*>(new MemberAccountNode(accID, firstName, lastName, phoneNumber, accBalance)));
+		}
+
+		std::cout << "Record Number: " << colIdx << " AccID: " << accID << " FN: " << firstName << " LN: " << lastName << " PN: " << phoneNumber << " Balance: " << accBalance << std::endl;
+	}
+}
+
 int main(int argv, char* argc[]) {
 	std::string dbFilename = "db_core.bin";					// This binary file will be used to track current table indicies
 	std::string accFilename = "account_db.bin";			// This binary file will act as the account db table for storing the account data
 	std::fstream fs;
+
+
+	MemberAccountTree accDB;
+	buildAccDBTree(accFilename, accDB);
+
 	bool runApp = true;
 	
 
