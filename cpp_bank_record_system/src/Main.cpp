@@ -11,12 +11,13 @@
 
 /* TODOS:
 * 1. Write BST Data to File on Account Creation (A new account can be appended to the end of the file, do not need to rebuild the store): Complete
-* 2. Read BST Data from File on Program Launch (Need to figure out how to sequence through data in file stream to build the BST data structure on program start from a data store)
-* 3. Implement a search function based on account number to retrieve target user data
-* 4. Update BST Tree on Withdrawl
-* 5. Update BST Tree on Deposit
-* 6. Update BST Tree on User Account Details Change
-* 7. Update BST Data Store on BST Data Modifiation (When the data in the BST is updated the file store will need to be updated to match - this is not very efficient but for a first time through its fine)
+* 2. Read BST Data from File on Program Launch - Ready to Implement
+* 3. Implement a search function based on account number to retrieve target user data - Ready to Implement
+* 4. Setup user input during account creation
+* 5. Update BST Tree on Withdrawl
+* 6. Update BST Tree on Deposit
+* 7. Update BST Tree on User Account Details Change
+* 8. Update BST Data Store on BST Data Modifiation (When the data in the BST is updated the file store will need to be updated to match - this is not very efficient but for a first time through its fine)
 */
 
 //bool openAccount(std::fstream& fs, std::string& filename) {
@@ -228,7 +229,6 @@ int main(int argv, char* argc[]) {
 			break;
 		case 3:
 			std::cout << "Withdraw Funds\n" << std::endl;
-
 			readDBInfo(accFilename);
 
 			break;
