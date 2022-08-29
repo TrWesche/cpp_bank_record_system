@@ -18,7 +18,78 @@
 * 6. Update BST Tree on Deposit
 * 7. Update BST Tree on User Account Details Change
 * 8. Update BST Data Store on BST Data Modifiation (When the data in the BST is updated the file store will need to be updated to match - this is not very efficient but for a first time through its fine)
+* 9. Update the BST to automatically balance the data in the tree, right now since the sorting index is linearly incremented we aren't taking advantage of the properties of a BST
 */
+
+
+void buildAccDBTree(std::string& filename, MemberAccountTree& OutOperationTree) {
+	std::fstream fs(filename, std::ios_base::binary | std::ios_base::in);
+	std::string accDataString;
+	std::vector<std::string> fileIterator;
+
+	if (!fs.is_open()) {
+		std::cout << "Database File Not Found, First Initialization" << std::endl;
+		return;
+	}
+
+	while (!fs.eof()) {
+		std::getline(fs, accDataString);
+		fileIterator.push_back(accDataString);
+	}
+
+	for (int i = 0; i < fileIterator.size(); i++) {
+		long accID = 0;
+		std::string firstName = "";
+		std::string lastName = "";
+		std::string phoneNumber = "";
+		long long accBalance = 0;
+
+		int colIdx = 0;
+		size_t startPos = 0;
+		size_t endPos = 0;
+
+		while (startPos != std::string::npos) {
+			endPos = fileIterator[i].find('\t', startPos);
+			switch (colIdx)
+			{
+			case 0:
+				accID = atol(fileIterator[i].substr(startPos, endPos - startPos).c_str());
+				break;
+			case 1:
+				firstName = fileIterator[i].substr(startPos, endPos - startPos);
+				break;
+			case 2:
+				lastName = fileIterator[i].substr(startPos, endPos - startPos);
+				break;
+			case 3:
+				phoneNumber = fileIterator[i].substr(startPos, endPos - startPos);
+				break;
+			case 4:
+				accBalance = atoll(fileIterator[i].substr(startPos, endPos - startPos).c_str());
+				break;
+			default:
+				break;
+			}
+
+			if (endPos == std::string::npos)
+			{
+				startPos = endPos;
+			}
+			else
+			{
+				startPos = endPos + 1;
+			}
+
+			colIdx++;
+		}
+
+		if (accID != 0) {
+			OutOperationTree.addNode(static_cast<BSTNode*>(new MemberAccountNode(accID, firstName, lastName, phoneNumber, accBalance)));
+		}
+
+		std::cout << "Record Number: " << colIdx << " AccID: " << accID << " FN: " << firstName << " LN: " << lastName << " PN: " << phoneNumber << " Balance: " << accBalance << std::endl;
+	}
+}
 
 //bool openAccount(std::fstream& fs, std::string& filename) {
 bool openAccount(std::string& filename, std::string& dbFilename) {
@@ -120,6 +191,37 @@ bool openAccount(std::string& filename, std::string& dbFilename) {
 	return true;
 }
 
+bool accSearch(MemberAccountTree& dbTree) {
+	std::cout << "Enter Account ID to Pull Up\n" << std::endl;
+
+	std::string accountIDInput;
+	std::cin >> accountIDInput;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	long accountID = atol(accountIDInput.c_str());
+
+	if (accountID == 0)
+	{
+		std::cout << "Invalid Account ID Entry, Please Re-Enter Account ID Value to Retrieve\n" << std::endl;
+		return false;
+	}
+
+	MemberAccountNode* searchResult =  dbTree.findNode(accountID);
+
+	if (searchResult == nullptr) {
+		std::cout << "Unable to locate and account with the input ID\n" << std::endl;
+		return false;
+	}
+
+	std::cout << "Account ID: " << searchResult->account_id << "\n";
+	std::cout << "Account Owner: " << searchResult->last_name << ", " << searchResult->first_name << "\n";
+	std::cout << "Contact Number: " << searchResult->phone_number << "\n";
+	std::cout << "Balance: " << searchResult->account_balance << "\n" << std::endl;
+
+	return true;
+}
+
+
 bool accWithdraw(std::fstream& fs, std::string& filename) {
 	//SimpleNode test(5);
 	//std::cout << "data" << test.data_internal << "left" << test.left_branch << "right" << test.right_branch << std::endl;
@@ -191,74 +293,7 @@ void readDBInfo(std::string& filename) {
 	return;
 }
 
-void buildAccDBTree(std::string& filename, MemberAccountTree& OutOperationTree) {
-	std::fstream fs(filename, std::ios_base::binary | std::ios_base::in);
-	std::string accDataString;
-	std::vector<std::string> fileIterator;
 
-	if (!fs.is_open()) {
-		std::cout << "Database File Not Found, First Initialization" << std::endl;
-		return;
-	}
-
-	while (!fs.eof()) {
-		std::getline(fs, accDataString);
-		fileIterator.push_back(accDataString);
-	}
-
-	for (int i = 0; i < fileIterator.size(); i++) {
-		long accID = 0;
-		std::string firstName = "";
-		std::string lastName = "";
-		std::string phoneNumber = "";
-		long long accBalance = 0;
-
-		int colIdx = 0;
-		size_t startPos = 0;
-		size_t endPos = 0;
-
-		while (startPos != std::string::npos) {
-			endPos = fileIterator[i].find('\t', startPos);
-			switch (colIdx)
-			{
-			case 0:
-				accID = atol(fileIterator[i].substr(startPos, endPos - startPos).c_str());
-				break;
-			case 1:
-				firstName = fileIterator[i].substr(startPos, endPos - startPos);
-				break;
-			case 2:
-				lastName = fileIterator[i].substr(startPos, endPos - startPos);
-				break;
-			case 3:
-				phoneNumber = fileIterator[i].substr(startPos, endPos - startPos);
-				break;
-			case 4:
-				accBalance = atoll(fileIterator[i].substr(startPos, endPos - startPos).c_str());
-				break;
-			default:
-				break;
-			}
-
-			if (endPos == std::string::npos)
-			{
-				startPos = endPos;
-			}
-			else
-			{
-				startPos = endPos + 1;
-			}
-
-			colIdx++;
-		}
-
-		if (accID != 0) {
-			OutOperationTree.addNode(static_cast<BSTNode*>(new MemberAccountNode(accID, firstName, lastName, phoneNumber, accBalance)));
-		}
-
-		std::cout << "Record Number: " << colIdx << " AccID: " << accID << " FN: " << firstName << " LN: " << lastName << " PN: " << phoneNumber << " Balance: " << accBalance << std::endl;
-	}
-}
 
 int main(int argv, char* argc[]) {
 	std::string dbFilename = "db_core.bin";					// This binary file will be used to track current table indicies
@@ -312,7 +347,7 @@ int main(int argv, char* argc[]) {
 			break;
 		case 5:
 			std::cout << "View Account Details\n" << std::endl;
-
+			accSearch(accDB);
 			break;
 		case 6:
 			std::cout << "Search Accounts\n" << std::endl;

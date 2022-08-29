@@ -261,6 +261,31 @@ bool MemberAccountTree::removeNode(BSTNode* remove_node)
 	return rSuccess;
 }
 
+MemberAccountNode* MemberAccountTree::findNode(int accountNumber) {
+	bool nodeFound = false;
+	MemberAccountNode* currentNode = static_cast<MemberAccountNode*>(getTreeRoot());
+
+	while (!nodeFound)
+	{
+		// Current Node is the target node
+		if (currentNode != nullptr && accountNumber == currentNode->account_id) {
+			nodeFound = true;
+		}
+		else if (currentNode != nullptr && accountNumber > currentNode->account_id) {
+			currentNode = static_cast<MemberAccountNode*>(currentNode->right_branch);
+		}
+		else if (currentNode != nullptr && accountNumber > currentNode->account_id) {
+			currentNode = static_cast<MemberAccountNode*>(currentNode->left_branch);
+		}
+		else
+		{
+			nodeFound = true;
+		}
+	}
+
+	return currentNode;
+}
+
 std::string MemberAccountTree::printTree(MemberAccountNode* node, int depth)
 {
 	std::string subtreeLeft;
