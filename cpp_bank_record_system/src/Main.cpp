@@ -12,8 +12,8 @@
 /* TODOS:
 * 1. Write BST Data to File on Account Creation (A new account can be appended to the end of the file, do not need to rebuild the store): Complete
 * 2. Read BST Data from File on Program Launch: Complete
-* 3. Implement a search function based on account number to retrieve target user data - Ready to Implement
-* 4. Setup user input during account creation
+* 3. Implement a search function based on account number to retrieve target user data - Complete
+* 4. Setup user input during account creation - Partially Working, The Output Stream appears to require writes in 4 byte chunks which is leading to extra filler characters & null characters being added in the addount_db.bin file.  Need to rework the data storage so it will work
 * 5. Update BST Tree on Withdrawl
 * 6. Update BST Tree on Deposit
 * 7. Update BST Tree on User Account Details Change
@@ -92,11 +92,37 @@ void buildAccDBTree(std::string& filename, MemberAccountTree& OutOperationTree) 
 }
 
 //bool openAccount(std::fstream& fs, std::string& filename) {
-bool openAccount(std::string& filename, std::string& dbFilename) {
+bool openAccount(std::string& filename, std::string& dbFilename, MemberAccountTree& dbTree) {
 	long accountID = 1;
 	std::string dbCoreRead;
 	std::vector<std::string> dbCoreIteratorUpd;
 	std::vector<std::string> dbCoreIterator;
+
+
+	std::string FirstName = "";
+	std::string LastName = "";
+	std::string PhoneNumber = "";
+	std::string AccountBalanceString = "";
+	long long AccountBalance = 0;
+
+	std::cout << "Enter the New Account Info\n" << std::endl;
+	std::cout << "First Name:" << std::endl;
+	std::cin >> FirstName;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	std::cout << "\nLast Name:" << std::endl;
+	std::cin >> LastName;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	std::cout << "\nPhone Number:" << std::endl;
+	std::cin >> PhoneNumber;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	std::cout << "\nInitial Account Balance:" << std::endl;
+	std::cin >> AccountBalanceString;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	AccountBalance = atoll(AccountBalanceString.c_str());
 
 	// Read In DB Core Data
 	std::fstream dbc_is(dbFilename, std::ios_base::binary | std::ios_base::in);
@@ -176,16 +202,15 @@ bool openAccount(std::string& filename, std::string& dbFilename) {
 		return false;
 	}
 
-	//long AccountID = 1;
-	std::string FirstName = "FirstName1";
-	std::string LastName = "LastName1";
-	std::string PhoneNumber = "123-456-7890";
-	long long AccountBalance = 123;
-
 
 	MemberAccount* account = new MemberAccount(accountID, FirstName, LastName, PhoneNumber, AccountBalance);
 	std::string accountString = account->CreateEntry();
 	fs.write(accountString.c_str(), sizeof accountString);
+	
+	MemberAccountNode* newAccount = new MemberAccountNode(accountID, FirstName, LastName, PhoneNumber, AccountBalance);
+	dbTree.addNode(static_cast<BSTNode*>(newAccount));
+
+	std::cout << "Account Created with Account ID: " << accountID << std::endl;
 
 	fs.close();
 	return true;
@@ -328,7 +353,7 @@ int main(int argv, char* argc[]) {
 		{
 		case 1:
 			std::cout << "Open An Account\n" << std::endl;
-			openAccount(accFilename, dbFilename);
+			openAccount(accFilename, dbFilename, accDB);
 			
 			break;
 		case 2:
