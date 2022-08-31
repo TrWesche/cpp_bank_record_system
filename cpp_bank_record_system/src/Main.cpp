@@ -249,119 +249,64 @@ bool accSearch(MemberAccountTree& dbTree) {
 }
 
 bool accWithdraw(MemberAccountTree& dbTree, std::string& filename) {
-	// Retrieve Account to Perform Withdrawl From
+	// Query User for Account ID to Withdraw From
 	std::cout << "Enter Account ID for Withdrawl\n" << std::endl;
-
 	std::string accountIDInput;
 	std::cin >> accountIDInput;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
 	long accountID = atol(accountIDInput.c_str());
-
 	if (accountID == 0)
 	{
 		std::cout << "Invalid Account ID Entry, Please Re-Enter Account ID Value to Retrieve\n" << std::endl;
 		return false;
 	}
 
+	// Retrieve Account to Perform Withdrawl From
 	MemberAccountNode* searchResult = dbTree.findNode(accountID);
-
-	if (searchResult == nullptr) {
+	if (searchResult == nullptr) 
+	{
 		std::cout << "Unable to locate and account with the input ID\n" << std::endl;
 		return false;
 	}
 
-
-	std::cout << "How much would you like to withdraw?\n" << std::endl;
 	// Query User for Withdrawl Amount
+	std::cout << "How much would you like to withdraw?\n" << std::endl;
 	std::string withdrawlAmountInput;
 	std::cin >> withdrawlAmountInput;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	
+	// Validate Withdrawl Operation
 	long long withdrawlAmount = atoll(withdrawlAmountInput.c_str());
-
-	if (withdrawlAmount > searchResult->account_balance) {
+	if (withdrawlAmount > searchResult->account_balance) 
+	{
 		std::cout << "Insufficient Funds\n" << std::endl;
 		return false;
 	}
 
-
 	// Update the Object in the Tree
 	searchResult->account_balance = searchResult->account_balance - withdrawlAmount;
 
+	// Update Database File
 	std::fstream dbct_os("acc_temp.bin", std::ios_base::binary | std::ios_base::out | std::ios_base::app);
-	if (!dbct_os.is_open()) {
+	if (!dbct_os.is_open()) 
+	{
 		std::cout << "Withdraw Failed - Failed to Update Account Database" << std::endl;
 		return false;
 	}
-
 	std::string updatedTree = dbTree.buildStorageData( static_cast<MemberAccountNode*>(dbTree.getTreeRoot()) );
-
-	std::cout << updatedTree << std::endl;
-
 	dbct_os.write(updatedTree.c_str(), updatedTree.length());
-
 	dbct_os.close();
-
 	remove(filename.c_str());
 	int renameCheck = rename("acc_temp.bin", filename.c_str());
-	if (renameCheck != 0) {
+	if (renameCheck != 0)
+	{
 		perror("Error encountered when renaming file");
 		return false;
 	}
 
-
+	// Notify User and Exit
 	std::cout << "Withdrew: " << withdrawlAmount;
 	std::cout << "\n\nRemaining Balance: " << searchResult->account_balance << std::endl;
-
-
-	return true;
-
-
-	//SimpleNode test(5);
-	//std::cout << "data" << test.data_internal << "left" << test.left_branch << "right" << test.right_branch << std::endl;
-	long AccountIDx = 1;
-	std::string FirstNamex = "FirstName1";
-	std::string LastNamex = "LastName1";
-	std::string PhoneNumberx = "111-456-7890";
-	long long AccountBalancex = 111545;
-
-	MemberAccountNode acctestx(AccountIDx, FirstNamex, LastNamex, PhoneNumberx, AccountBalancex);
-
-
-
-
-	long AccountID = 2;
-	std::string FirstName = "FirstName2";
-	std::string LastName = "LastName2";
-	std::string PhoneNumber = "222-456-7890";
-	long long AccountBalance = 234545;
-
-	MemberAccountNode acctest(AccountID, FirstName, LastName, PhoneNumber, AccountBalance);
-
-	acctest.left_branch = &acctestx;
-
-	std::cout << "Member Account Node" <<
-		acctest.account_id << " " <<
-		acctest.first_name << " " <<
-		acctest.last_name << " " <<
-		acctest.phone_number << " " <<
-		acctest.account_balance << " " <<
-		acctest.left_branch << " " <<
-		acctest.right_branch << " " << std::endl;
-
-
-	
-	
-	// Read in previous account balance
-	//fs.open(filename, std::ios_base::binary | std::ios_base::in);
-
-	//fs.close();
-
-	// Write new account balance
-	//fs.open(filename, std::ios_base::binary | std::ios_base::out);
-
-	//fs.close();
 	return true;
 }
 
