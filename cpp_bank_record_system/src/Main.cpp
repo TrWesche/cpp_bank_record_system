@@ -205,7 +205,9 @@ bool openAccount(std::string& filename, std::string& dbFilename, MemberAccountTr
 
 	MemberAccount* account = new MemberAccount(accountID, FirstName, LastName, PhoneNumber, AccountBalance);
 	std::string accountString = account->CreateEntry();
-	fs.write(accountString.c_str(), sizeof accountString);
+	std::cout << accountString.length() << std::endl;
+	std::cout << sizeof accountString << std::endl;
+	fs.write(accountString.c_str(), accountString.length());
 	
 	MemberAccountNode* newAccount = new MemberAccountNode(accountID, FirstName, LastName, PhoneNumber, AccountBalance);
 	dbTree.addNode(static_cast<BSTNode*>(newAccount));
