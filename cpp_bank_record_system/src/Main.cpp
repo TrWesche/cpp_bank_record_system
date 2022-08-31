@@ -310,6 +310,66 @@ bool accWithdraw(MemberAccountTree& dbTree, std::string& filename) {
 	return true;
 }
 
+
+
+bool accDeposit(MemberAccountTree& dbTree, std::string& filename) {
+	// Query User for Account ID to Deposit To
+	std::cout << "Enter Account ID for Deposit\n" << std::endl;
+	std::string accountIDInput;
+	std::cin >> accountIDInput;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	long accountID = atol(accountIDInput.c_str());
+	if (accountID == 0)
+	{
+		std::cout << "Invalid Account ID Entry, Please Re-Enter Account ID Value to Retrieve\n" << std::endl;
+		return false;
+	}
+
+	// Retrieve Account to Perform Deposit To
+	MemberAccountNode* searchResult = dbTree.findNode(accountID);
+	if (searchResult == nullptr)
+	{
+		std::cout << "Unable to locate and account with the input ID\n" << std::endl;
+		return false;
+	}
+
+	// Query User for Deposit Amount
+	std::cout << "How much would you like to deposit?\n" << std::endl;
+	std::string depositAmountInput;
+	std::cin >> depositAmountInput;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	// Update the Object in the Tree
+	long long depositAmount = atoll(depositAmountInput.c_str());
+	searchResult->account_balance = searchResult->account_balance + depositAmount;
+
+	// Update Database File
+	std::fstream dbct_os("acc_temp.bin", std::ios_base::binary | std::ios_base::out | std::ios_base::app);
+	if (!dbct_os.is_open())
+	{
+		std::cout << "Deposit Failed - Failed to Update Account Database" << std::endl;
+		return false;
+	}
+	std::string updatedTree = dbTree.buildStorageData(static_cast<MemberAccountNode*>(dbTree.getTreeRoot()));
+	dbct_os.write(updatedTree.c_str(), updatedTree.length());
+	dbct_os.close();
+	remove(filename.c_str());
+	int renameCheck = rename("acc_temp.bin", filename.c_str());
+	if (renameCheck != 0)
+	{
+		perror("Error encountered when renaming file");
+		return false;
+	}
+
+	// Notify User and Exit
+	std::cout << "Deposited: " << depositAmount;
+	std::cout << "\n\nNew Balance: " << searchResult->account_balance << std::endl;
+	return true;
+}
+
+
+
+
 void readDBInfo(std::string& filename) {
 	std::fstream fs(filename, std::ios_base::binary | std::ios_base::in);
 	std::string accDataString;
@@ -381,7 +441,7 @@ int main(int argv, char* argc[]) {
 			break;
 		case 4:
 			std::cout << "Deposit Funds\n" << std::endl;
-
+			accDeposit(accDB, accFilename);
 			break;
 		case 5:
 			std::cout << "View Account Details\n" << std::endl;
