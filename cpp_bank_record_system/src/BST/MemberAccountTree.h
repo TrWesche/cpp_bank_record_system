@@ -19,4 +19,5 @@ public:
 
 	std::string printTree(MemberAccountNode* node, int depth = 0);
 
+	std::string buildStorageData(MemberAccountNode* node);
 };

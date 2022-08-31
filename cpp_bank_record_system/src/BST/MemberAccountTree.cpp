@@ -1,5 +1,7 @@
 #include <iostream>
+#include <vector>
 #include "MemberAccountTree.h"
+#include "../MemberAccount.h"
 
 MemberAccountTree::MemberAccountTree()
 {
@@ -306,5 +308,26 @@ std::string MemberAccountTree::printTree(MemberAccountNode* node, int depth)
 	else
 	{
 		return "";
+	}
+}
+
+
+std::string MemberAccountTree::buildStorageData(MemberAccountNode* node) {
+	std::string subtreeLeft;
+	std::string subtreeRight;
+	if (node != nullptr) {
+		if (node->left_branch != nullptr) {
+			subtreeLeft = buildStorageData(static_cast<MemberAccountNode*>(node->left_branch));
+		}
+
+		if (node->right_branch != nullptr) {
+			subtreeRight = buildStorageData(static_cast<MemberAccountNode*>(node->right_branch));
+		}
+		
+		std::string accountData = MemberAccount(node->account_id, node->first_name, node->last_name, node->phone_number, node->account_balance).CreateEntry();
+
+		return accountData + subtreeLeft + subtreeRight;
+		//std::cout << depth << ":  " << node->account_id << std::endl;
+		//std::cout << node->account_id;
 	}
 }

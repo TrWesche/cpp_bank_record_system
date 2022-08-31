@@ -13,7 +13,7 @@
 * 1. Write BST Data to File on Account Creation (A new account can be appended to the end of the file, do not need to rebuild the store): Complete
 * 2. Read BST Data from File on Program Launch: Complete
 * 3. Implement a search function based on account number to retrieve target user data - Complete
-* 4. Setup user input during account creation - Partially Working, The Output Stream appears to require writes in 4 byte chunks which is leading to extra filler characters & null characters being added in the addount_db.bin file.  Need to rework the data storage so it will work
+* 4. Setup user input during account creation - Complete, sizeof was returning the full length of the containing string object which when passed through the filestream write was pushing junk data into the data store
 * 5. Update BST Tree on Withdrawl
 * 6. Update BST Tree on Deposit
 * 7. Update BST Tree on User Account Details Change
@@ -248,8 +248,76 @@ bool accSearch(MemberAccountTree& dbTree) {
 	return true;
 }
 
+bool accWithdraw(MemberAccountTree& dbTree, std::string& filename) {
+	// Retrieve Account to Perform Withdrawl From
+	std::cout << "Enter Account ID for Withdrawl\n" << std::endl;
 
-bool accWithdraw(std::fstream& fs, std::string& filename) {
+	std::string accountIDInput;
+	std::cin >> accountIDInput;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	long accountID = atol(accountIDInput.c_str());
+
+	if (accountID == 0)
+	{
+		std::cout << "Invalid Account ID Entry, Please Re-Enter Account ID Value to Retrieve\n" << std::endl;
+		return false;
+	}
+
+	MemberAccountNode* searchResult = dbTree.findNode(accountID);
+
+	if (searchResult == nullptr) {
+		std::cout << "Unable to locate and account with the input ID\n" << std::endl;
+		return false;
+	}
+
+
+	std::cout << "How much would you like to withdraw?\n" << std::endl;
+	// Query User for Withdrawl Amount
+	std::string withdrawlAmountInput;
+	std::cin >> withdrawlAmountInput;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	
+	long long withdrawlAmount = atoll(withdrawlAmountInput.c_str());
+
+	if (withdrawlAmount > searchResult->account_balance) {
+		std::cout << "Insufficient Funds\n" << std::endl;
+		return false;
+	}
+
+
+	// Update the Object in the Tree
+	searchResult->account_balance = searchResult->account_balance - withdrawlAmount;
+
+	std::fstream dbct_os("acc_temp.bin", std::ios_base::binary | std::ios_base::out | std::ios_base::app);
+	if (!dbct_os.is_open()) {
+		std::cout << "Withdraw Failed - Failed to Update Account Database" << std::endl;
+		return false;
+	}
+
+	std::string updatedTree = dbTree.buildStorageData( static_cast<MemberAccountNode*>(dbTree.getTreeRoot()) );
+
+	std::cout << updatedTree << std::endl;
+
+	dbct_os.write(updatedTree.c_str(), updatedTree.length());
+
+	dbct_os.close();
+
+	remove(filename.c_str());
+	int renameCheck = rename("acc_temp.bin", filename.c_str());
+	if (renameCheck != 0) {
+		perror("Error encountered when renaming file");
+		return false;
+	}
+
+
+	std::cout << "Withdrew: " << withdrawlAmount;
+	std::cout << "\n\nRemaining Balance: " << searchResult->account_balance << std::endl;
+
+
+	return true;
+
+
 	//SimpleNode test(5);
 	//std::cout << "data" << test.data_internal << "left" << test.left_branch << "right" << test.right_branch << std::endl;
 	long AccountIDx = 1;
@@ -360,13 +428,11 @@ int main(int argv, char* argc[]) {
 			break;
 		case 2:
 			std::cout << "Check Account Balance\n" << std::endl;
-			accWithdraw(fs, accFilename);
 			
 			break;
 		case 3:
 			std::cout << "Withdraw Funds\n" << std::endl;
-			readDBInfo(accFilename);
-
+			accWithdraw(accDB, accFilename);
 			break;
 		case 4:
 			std::cout << "Deposit Funds\n" << std::endl;
@@ -376,9 +442,10 @@ int main(int argv, char* argc[]) {
 			std::cout << "View Account Details\n" << std::endl;
 			accSearch(accDB);
 			break;
+
 		case 6:
 			std::cout << "Search Accounts\n" << std::endl;
-
+			readDBInfo(accFilename);
 			break;
 		case 7:
 			std::cout << "Close An Account\n" << std::endl;
